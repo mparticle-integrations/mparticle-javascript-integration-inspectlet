@@ -9,43 +9,32 @@
     },
     isInitialized = false,
     forwarderSettings,
-    name = 'Inspectlet';
+    name = 'Inspectlet',
+    reportingService,
+    id = null;
 
     function getIdentityTypeName(identityType) {
-        switch (identityType) {
-            case mParticle.IdentityType.CustomerId:
-                return 'Customer ID';
-            case mParticle.IdentityType.Facebook:
-                return 'Facebook ID';
-            case mParticle.IdentityType.Twitter:
-                return 'Twitter ID';
-            case mParticle.IdentityType.Google:
-                return 'Google ID';
-            case mParticle.IdentityType.Microsoft:
-                return 'Microsoft ID';
-            case mParticle.IdentityType.Yahoo:
-                return 'Yahoo ID';
-            case mParticle.IdentityType.Email:
-                return 'Email';
-            case mParticle.IdentityType.Alias:
-                return 'Alias ID';
-            case mParticle.IdentityType.FacebookCustomAudienceId:
-                return 'Facebook App User ID';
-            default:
-                return 'Other ID';
-        }
+        return mParticle.IdentityType.getName(identityType);
     }
 
     function processEvent(event) {
+        var reportEvent = false;
+
         if (isInitialized) {
             try {
-                if (event.dt == MessageType.PageEvent) {
-                    if (event.et == window.mParticle.EventType.Transaction) {
+                if (event.EventDataType == MessageType.PageEvent) {
+                    if (event.EventCategory == window.mParticle.EventType.Transaction) {
                         logTransaction(event);
+
                         return 'Successfully sent to ' + name;
-                    } else if (event.dt == window.mParticle.EventType.Navigation) {
+                    }
+                    else if (event.EventDataType == window.mParticle.EventType.Navigation) {
                         __insp.push(["virtualPage"]);
                         return 'Successfully sent virtual page view to ' + name;
+                    }
+
+                    if (reportEvent && reportingService) {
+                        reportingService(id, event);
                     }
                 } 
 
@@ -64,15 +53,19 @@
     }
 
     function setUserAttribute(key, value) {
+        var attributeDict;
+
         if (isInitialized) {
             if (value) {
-                var attributeDict = {};
+                attributeDict = {};
                 attributeDict[key] = value;
                 __insp.push(['tagSession', attributeDict]);
-            } else {
+            }
+            else {
                 __insp.push(['tagSession', key]);
             }
-        } else {
+        }
+        else {
             return 'Can\'t call setUserAttribute on forwarder ' + name + ', not initialized';
         }
     }
@@ -80,14 +73,18 @@
     function setUserIdentity(id, type) {
         if (isInitialized) {
             setUserAttribute(getIdentityTypeName(type), id);
-        } else {
+        }
+        else {
             return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
         }
     }
 
-    function initForwarder(settings) {
+    function initForwarder(settings, service, moduleId) {
+        forwarderSettings = settings;
+        id = moduleId;
+        reportingService = service;
+
         try {
-            forwarderSettings = settings;
             function addInspectlet() {
                 function __ldinsp() {
                     var insp = document.createElement('script');
@@ -98,9 +95,11 @@
                     var head = document.getElementsByTagName('head')[0];
                     head.appendChild(insp);
                 }
+
                 if (window.attachEvent) {
                     window.attachEvent('onload', __ldinsp);
-                } else {
+                }
+                else {
                     window.addEventListener('load', __ldinsp, false);
                 }
             }

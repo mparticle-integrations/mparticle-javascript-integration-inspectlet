@@ -1,0 +1,10 @@
+{
+  "name": "integration-inspectlet",
+  "description": "mParticle integration sdk for Inspectlet",
+  "repository": "https://github.com/mParticle/integration-inspectlet",
+  "devDependencies": {
+    "blanket": "^1.1.7",
+    "should": "^7.1.0",
+    "mocha": "^2.3.2"
+  }
+}

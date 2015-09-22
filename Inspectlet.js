@@ -5,38 +5,45 @@
         PageView: 3,
         PageEvent: 4,
         CrashReport: 5,
-        OptOut: 6
+        OptOut: 6,
+        Commerce: 16
     },
     isInitialized = false,
     forwarderSettings,
     name = 'Inspectlet',
     reportingService,
-    id = null;
+    id = null,
+    isTesting = false;
 
     function getIdentityTypeName(identityType) {
         return mParticle.IdentityType.getName(identityType);
     }
 
-    function processEvent(event) {
-        var reportEvent = false;
+    function reportEvent(event) {
+        if(reportingService) {
+            reportingService(id, event);
+        }
+    }
 
+    function processEvent(event) {
         if (isInitialized) {
             try {
                 if (event.EventDataType == MessageType.PageEvent) {
                     if (event.EventCategory == window.mParticle.EventType.Transaction) {
                         logTransaction(event);
-
+                        reportEvent(event);
                         return 'Successfully sent to ' + name;
                     }
-                    else if (event.EventDataType == window.mParticle.EventType.Navigation) {
+                    else if (event.EventCategory == window.mParticle.EventType.Navigation) {
                         __insp.push(["virtualPage"]);
+                        reportEvent(event);
+
                         return 'Successfully sent virtual page view to ' + name;
                     }
-
-                    if (reportEvent && reportingService) {
-                        reportingService(id, event);
-                    }
-                } 
+                }
+                else if(event.EventDataType == MessageType.Commerce) {
+                    logTransaction(event);
+                }
 
                 return 'Ignoring non-transaction event for ' + name;
             }
@@ -49,7 +56,7 @@
     }
 
     function logTransaction(data) {
-        __insp.push(['tagSession', "purchase"]); 
+        __insp.push(['tagSession', "purchase"]);
     }
 
     function setUserAttribute(key, value) {
@@ -79,10 +86,11 @@
         }
     }
 
-    function initForwarder(settings, service, moduleId) {
+    function initForwarder(settings, service, moduleId, testMode) {
         forwarderSettings = settings;
         id = moduleId;
         reportingService = service;
+        isTesting = testMode;
 
         try {
             function addInspectlet() {
@@ -106,7 +114,10 @@
 
             window.__insp = window.__insp || [];
             __insp.push(['wid', forwarderSettings.WId]);
-            addInspectlet();
+
+            if(isTesting === false) {
+                addInspectlet();
+            }
 
             isInitialized = true;
 

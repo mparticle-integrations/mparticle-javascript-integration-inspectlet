@@ -42,8 +42,8 @@ describe('Inspectlet Forwarder', function () {
             this.id = null;
             this.event = null;
 
-            this.cb = function (id, event) {
-                self.id = id;
+            this.cb = function (forwarder, event) {
+                self.id = forwarder.id;
                 self.event = event;
             };
 
@@ -57,11 +57,23 @@ describe('Inspectlet Forwarder', function () {
     before(function () {
         mParticle.EventType = EventType;
         mParticle.IdentityType = IdentityType;
-        mParticle.forwarder.init({}, reportService.cb, 1, true);
+        mParticle.forwarder.init({}, reportService.cb, true);
+        mParticle.forwarder.id = 1;
     });
 
     beforeEach(function () {
         window.__insp = [];
+    });
+
+    it('should report forwarding stats', function(done) {
+        mParticle.forwarder.process({
+            EventDataType: MessageType.PageEvent,
+            EventCategory: EventType.Navigation
+        });
+
+        reportService.should.have.property('id', 1);
+
+        done();
     });
 
     it('should log navigation event', function (done) {

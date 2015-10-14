@@ -131,7 +131,7 @@
                 }
 
                 window.__insp = window.__insp || [];
-                __insp.push(['wid', forwarderSettings.WId]);
+                __insp.push(['wid', forwarderSettings.wId]);
 
                 if(isTesting === false) {
                     addInspectlet();

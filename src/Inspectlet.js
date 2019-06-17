@@ -23,7 +23,8 @@
         OptOut: 6,
         Commerce: 16
     },
-    name = 'Inspectlet';
+    name = 'Inspectlet',
+    moduleId = 61;
 
     var constructor = function () {
         var self = this,
@@ -151,6 +152,17 @@
         this.setUserAttribute = setUserAttribute;
         this.setUserIdentity = setUserIdentity;
     };
+    function getId() {
+        return moduleId;
+    }
+
+    function register(config) {
+        if (config.kits) {
+            config.kits[name] = {
+                constructor: constructor
+            };
+        }
+    }
 
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
         return;
@@ -158,7 +170,12 @@
 
     window.mParticle.addForwarder({
         name: name,
-        constructor: constructor
+        constructor: constructor,
+        getId: getId
     });
+
+    module.exports = {
+        register: register
+    };
 
 })(window);

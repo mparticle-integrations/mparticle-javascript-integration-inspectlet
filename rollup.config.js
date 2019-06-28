@@ -1,36 +1,53 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
-export default [{
-    input: 'src/Inspectlet.js',
-    output: {
-        file: 'Inspectlet.js',
-        format: 'umd',
-        exports: 'named',
-        name: 'mp-inspectlet-kit',
-        strict: false
+export default [
+    {
+        input: 'src/Inspectlet.js',
+        output: {
+            file: 'src/Inspectlet.js',
+            format: 'iife',
+            exports: 'named',
+            name: 'mpInspectletKit',
+            strict: false
+        },
+        plugins: [
+            resolve({
+                browser: true
+            }),
+            commonjs()
+        ]
     },
-    plugins: [
-        resolve({
-            browser: true
-        }),
-        commonjs()
-    ]
-},
-{
-    input: 'src/Inspectlet.js',
-    output: {
-        file: 'dist/Inspectlet.js',
-        format: 'umd',
-        exports: 'named',
-        name: 'mp-inspectlet-kit',
-        strict: false
+    {
+        input: 'src/Inspectlet.js',
+        output: {
+            file: 'dist/Inspectlet.js',
+            format: 'iife',
+            exports: 'named',
+            name: 'mpInspectletKit',
+            strict: false
+        },
+        plugins: [
+            resolve({
+                browser: true
+            }),
+            commonjs()
+        ]
     },
-    plugins: [
-        resolve({
-            browser: true
-        }),
-        commonjs()
-    ]
-}
-] 
+    {
+        input: 'src/Inspectlet.js',
+        output: {
+            file: 'npm/Inspectlet.js',
+            format: 'cjs',
+            exports: 'named',
+            name: 'mpInspectletKit',
+            strict: false
+        },
+        plugins: [
+            resolve({
+                browser: true
+            }),
+            commonjs()
+        ]
+    }
+]

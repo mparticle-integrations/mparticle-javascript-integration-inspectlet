@@ -1,200 +1,223 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(global = global || self, factory(global['mp-inspectlet-kit'] = {}));
-}(this, function (exports) {
-	function createCommonjsModule(fn, module) {
-		return module = { exports: {} }, fn(module, module.exports), module.exports;
-	}
+(function () {
+  var mpInspectletKit = (function (exports) {
+    /*!
+     * isobject <https://github.com/jonschlinkert/isobject>
+     *
+     * Copyright (c) 2014-2017, Jon Schlinkert.
+     * Released under the MIT License.
+     */
 
-	var Inspectlet = createCommonjsModule(function (module) {
-	//
-	//  Copyright 2015 mParticle, Inc.
-	//
-	//  Licensed under the Apache License, Version 2.0 (the "License");
-	//  you may not use this file except in compliance with the License.
-	//  You may obtain a copy of the License at
-	//
-	//      http://www.apache.org/licenses/LICENSE-2.0
-	//
-	//  Unless required by applicable law or agreed to in writing, software
-	//  distributed under the License is distributed on an "AS IS" BASIS,
-	//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	//  See the License for the specific language governing permissions and
-	//  limitations under the License.
+    function isObject(val) {
+      return val != null && typeof val === 'object' && Array.isArray(val) === false;
+    }
 
-	(function (window) {
-	    var MessageType = {
-	        SessionStart: 1,
-	        SessionEnd: 2,
-	        PageView: 3,
-	        PageEvent: 4,
-	        CrashReport: 5,
-	        OptOut: 6,
-	        Commerce: 16
-	    },
-	    name = 'Inspectlet',
-	    moduleId = 61;
+    //
+    //  Copyright 2015 mParticle, Inc.
+    //
+    //  Licensed under the Apache License, Version 2.0 (the "License");
+    //  you may not use this file except in compliance with the License.
+    //  You may obtain a copy of the License at
+    //
+    //      http://www.apache.org/licenses/LICENSE-2.0
+    //
+    //  Unless required by applicable law or agreed to in writing, software
+    //  distributed under the License is distributed on an "AS IS" BASIS,
+    //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    //  See the License for the specific language governing permissions and
+    //  limitations under the License.
 
-	    var constructor = function () {
-	        var self = this,
-	            isInitialized = false,
-	            forwarderSettings,
-	            reportingService,
-	            isTesting = false;
+        
 
-	        self.name = name;
+        var MessageType = {
+            SessionStart: 1,
+            SessionEnd: 2,
+            PageView: 3,
+            PageEvent: 4,
+            CrashReport: 5,
+            OptOut: 6,
+            Commerce: 16
+        },
+        name = 'Inspectlet',
+        moduleId = 61;
 
-	        function getIdentityTypeName(identityType) {
-	            return mParticle.IdentityType.getName(identityType);
-	        }
+        var constructor = function () {
+            var self = this,
+                isInitialized = false,
+                forwarderSettings,
+                reportingService,
+                isTesting = false;
 
-	        function reportEvent(event) {
-	            if(reportingService) {
-	                reportingService(self, event);
-	            }
-	        }
+            self.name = name;
 
-	        function processEvent(event) {
-	            if (isInitialized) {
-	                try {
-	                    if (event.EventDataType == MessageType.PageEvent) {
-	                        if (event.EventCategory == window.mParticle.EventType.Transaction) {
-	                            logTransaction(event);
-	                            reportEvent(event);
-	                            return 'Successfully sent to ' + name;
-	                        }
-	                        else if (event.EventCategory == window.mParticle.EventType.Navigation) {
-	                            __insp.push(["virtualPage"]);
-	                            reportEvent(event);
+            function getIdentityTypeName(identityType) {
+                return window.mParticle.IdentityType.getName(identityType);
+            }
 
-	                            return 'Successfully sent virtual page view to ' + name;
-	                        }
-	                    }
-	                    else if(event.EventDataType == MessageType.Commerce) {
-	                        logTransaction(event);
-	                    }
+            function reportEvent(event) {
+                if(reportingService) {
+                    reportingService(self, event);
+                }
+            }
 
-	                    return 'Ignoring non-transaction event for ' + name;
-	                }
-	                catch (e) {
-	                    return 'Failed to send to: ' + name + ' ' + e;
-	                }
-	            }
+            function processEvent(event) {
+                if (isInitialized) {
+                    try {
+                        if (event.EventDataType == MessageType.PageEvent) {
+                            if (event.EventCategory == window.mParticle.EventType.Transaction) {
+                                logTransaction(event);
+                                reportEvent(event);
+                                return 'Successfully sent to ' + name;
+                            }
+                            else if (event.EventCategory == window.mParticle.EventType.Navigation) {
+                                __insp.push(["virtualPage"]);
+                                reportEvent(event);
 
-	            return 'Can\'t send to forwarder ' + name + ', not initialized';
-	        }
+                                return 'Successfully sent virtual page view to ' + name;
+                            }
+                        }
+                        else if(event.EventDataType == MessageType.Commerce) {
+                            logTransaction(event);
+                        }
 
-	        function logTransaction(data) {
-	            __insp.push(['tagSession', "purchase"]);
-	        }
+                        return 'Ignoring non-transaction event for ' + name;
+                    }
+                    catch (e) {
+                        return 'Failed to send to: ' + name + ' ' + e;
+                    }
+                }
 
-	        function setUserAttribute(key, value) {
-	            var attributeDict;
+                return 'Can\'t send to forwarder ' + name + ', not initialized';
+            }
 
-	            if (isInitialized) {
-	                if (value) {
-	                    attributeDict = {};
-	                    attributeDict[key] = value;
-	                    __insp.push(['tagSession', attributeDict]);
-	                }
-	                else {
-	                    __insp.push(['tagSession', key]);
-	                }
-	            }
-	            else {
-	                return 'Can\'t call setUserAttribute on forwarder ' + name + ', not initialized';
-	            }
-	        }
+            function logTransaction(data) {
+                __insp.push(['tagSession', "purchase"]);
+            }
 
-	        function setUserIdentity(id, type) {
-	            if (isInitialized) {
-	                setUserAttribute(getIdentityTypeName(type), id);
-	            }
-	            else {
-	                return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
-	            }
-	        }
+            function setUserAttribute(key, value) {
+                var attributeDict;
 
-	        function initForwarder(settings, service, testMode) {
-	            forwarderSettings = settings;
-	            reportingService = service;
-	            isTesting = testMode;
+                if (isInitialized) {
+                    if (value) {
+                        attributeDict = {};
+                        attributeDict[key] = value;
+                        __insp.push(['tagSession', attributeDict]);
+                    }
+                    else {
+                        __insp.push(['tagSession', key]);
+                    }
+                }
+                else {
+                    return 'Can\'t call setUserAttribute on forwarder ' + name + ', not initialized';
+                }
+            }
 
-	            try {
-	                function addInspectlet() {
-	                    function __ldinsp() {
-	                        var insp = document.createElement('script');
-	                        insp.type = 'text/javascript';
-	                        insp.async = true;
-	                        insp.id = "inspsync";
-	                        insp.src = ('https:' == document.location.protocol ? 'https' : 'http') + '://cdn.inspectlet.com/inspectlet.js';
-	                        var head = document.getElementsByTagName('head')[0];
-	                        head.appendChild(insp);
-	                    }
+            function setUserIdentity(id, type) {
+                if (isInitialized) {
+                    setUserAttribute(getIdentityTypeName(type), id);
+                }
+                else {
+                    return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
+                }
+            }
 
-	                    if (window.attachEvent) {
-	                        window.attachEvent('onload', __ldinsp);
-	                    }
-	                    else {
-	                        window.addEventListener('load', __ldinsp, false);
-	                    }
-	                }
+            function initForwarder(settings, service, testMode) {
+                forwarderSettings = settings;
+                reportingService = service;
+                isTesting = testMode;
 
-	                window.__insp = window.__insp || [];
-	                __insp.push(['wid', forwarderSettings.wId]);
+                try {
+                    function addInspectlet() {
+                        function __ldinsp() {
+                            var insp = document.createElement('script');
+                            insp.type = 'text/javascript';
+                            insp.async = true;
+                            insp.id = "inspsync";
+                            insp.src = ('https:' == document.location.protocol ? 'https' : 'http') + '://cdn.inspectlet.com/inspectlet.js';
+                            var head = document.getElementsByTagName('head')[0];
+                            head.appendChild(insp);
+                        }
 
-	                if(isTesting === false) {
-	                    addInspectlet();
-	                }
+                        if (window.attachEvent) {
+                            window.attachEvent('onload', __ldinsp);
+                        }
+                        else {
+                            window.addEventListener('load', __ldinsp, false);
+                        }
+                    }
 
-	                isInitialized = true;
+                    window.__insp = window.__insp || [];
+                    __insp.push(['wid', forwarderSettings.wId]);
 
-	                return 'Successfully initialized: ' + name;
-	            }
-	            catch (e) {
-	                return 'Failed to initialize: ' + name;
-	            }
-	        }
+                    if(isTesting === false) {
+                        addInspectlet();
+                    }
 
-	        this.init = initForwarder;
-	        this.process = processEvent;
-	        this.setUserAttribute = setUserAttribute;
-	        this.setUserIdentity = setUserIdentity;
-	    };
-	    function getId() {
-	        return moduleId;
-	    }
+                    isInitialized = true;
 
-	    function register(config) {
-	        if (config.kits) {
-	            config.kits[name] = {
-	                constructor: constructor
-	            };
-	        }
-	    }
+                    return 'Successfully initialized: ' + name;
+                }
+                catch (e) {
+                    return 'Failed to initialize: ' + name;
+                }
+            }
 
-	    if (!window || !window.mParticle || !window.mParticle.addForwarder) {
-	        return;
-	    }
+            this.init = initForwarder;
+            this.process = processEvent;
+            this.setUserAttribute = setUserAttribute;
+            this.setUserIdentity = setUserIdentity;
+        };
+        function getId() {
+            return moduleId;
+        }
 
-	    window.mParticle.addForwarder({
-	        name: name,
-	        constructor: constructor,
-	        getId: getId
-	    });
+        function register(config) {
+            if (!config) {
+                window.console.log('You must pass a config object to register the kit ' + name);
+                return;
+            }
 
-	    module.exports = {
-	        register: register
-	    };
+            if (!isObject(config)) {
+                window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+                return;
+            }
 
-	})(window);
-	});
-	var Inspectlet_1 = Inspectlet.register;
+            if (isObject(config.kits)) {
+                config.kits[name] = {
+                    constructor: constructor
+                };
+            } else {
+                config.kits = {};
+                config.kits[name] = {
+                    constructor: constructor
+                };
+            }
+            window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+        }
 
-	exports.default = Inspectlet;
-	exports.register = Inspectlet_1;
+        if (window && window.mParticle && window.mParticle.addForwarder) {
+            window.mParticle.addForwarder({
+                name: name,
+                constructor: constructor,
+                getId: getId
+            });
+        }
 
-	Object.defineProperty(exports, '__esModule', { value: true });
+        window.mParticle.addForwarder({
+            name: name,
+            constructor: constructor,
+            getId: getId
+        });
 
-}));
+        var Inspectlet = {
+            register: register
+        };
+    var Inspectlet_1 = Inspectlet.register;
+
+    exports.default = Inspectlet;
+    exports.register = Inspectlet_1;
+
+    return exports;
+
+  }({}));
+
+}());

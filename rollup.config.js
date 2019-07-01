@@ -21,7 +21,7 @@ export default [
     {
         input: 'src/Inspectlet.js',
         output: {
-            file: 'dist/Inspectlet.js',
+            file: 'dist/Inspectlet.iife.js',
             format: 'iife',
             exports: 'named',
             name: 'mpInspectletKit',
@@ -37,7 +37,7 @@ export default [
     {
         input: 'src/Inspectlet.js',
         output: {
-            file: 'npm/Inspectlet.js',
+            file: 'dist/Inspectlet.common.js',
             format: 'cjs',
             exports: 'named',
             name: 'mpInspectletKit',

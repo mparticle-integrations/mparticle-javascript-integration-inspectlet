@@ -1,31 +1,19 @@
-var mpInspectletKit = (function (exports) {
-    /*!
-     * isobject <https://github.com/jonschlinkert/isobject>
-     *
-     * Copyright (c) 2014-2017, Jon Schlinkert.
-     * Released under the MIT License.
-     */
+//
+//  Copyright 2015 mParticle, Inc.
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-    function isObject(val) {
-        return val != null && typeof val === 'object' && Array.isArray(val) === false;
-    }
-
-    //
-    //  Copyright 2015 mParticle, Inc.
-    //
-    //  Licensed under the Apache License, Version 2.0 (the "License");
-    //  you may not use this file except in compliance with the License.
-    //  You may obtain a copy of the License at
-    //
-    //      http://www.apache.org/licenses/LICENSE-2.0
-    //
-    //  Unless required by applicable law or agreed to in writing, software
-    //  distributed under the License is distributed on an "AS IS" BASIS,
-    //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    //  See the License for the specific language governing permissions and
-    //  limitations under the License.
-
-
+    var isobject = require('isobject');
 
     var MessageType = {
         SessionStart: 1,
@@ -49,7 +37,7 @@ var mpInspectletKit = (function (exports) {
         self.name = name;
 
         function getIdentityTypeName(identityType) {
-            return window.mParticle.IdentityType.getName(identityType);
+            return mParticle.IdentityType.getName(identityType);
         }
 
         function reportEvent(event) {
@@ -175,12 +163,12 @@ var mpInspectletKit = (function (exports) {
             return;
         }
 
-        if (!isObject(config)) {
+        if (!isobject(config)) {
             window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
         }
 
-        if (isObject(config.kits)) {
+        if (isobject(config.kits)) {
             config.kits[name] = {
                 constructor: constructor
             };
@@ -201,20 +189,7 @@ var mpInspectletKit = (function (exports) {
         });
     }
 
-    window.mParticle.addForwarder({
-        name: name,
-        constructor: constructor,
-        getId: getId
-    });
-
-    var Inspectlet = {
+    module.exports = {
         register: register
     };
-    var Inspectlet_1 = Inspectlet.register;
 
-    exports.default = Inspectlet;
-    exports.register = Inspectlet_1;
-
-    return exports;
-
-}({}));

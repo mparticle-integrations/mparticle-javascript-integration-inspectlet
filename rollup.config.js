@@ -5,7 +5,7 @@ export default [
     {
         input: 'src/Inspectlet.js',
         output: {
-            file: 'src/Inspectlet.js',
+            file: 'Inspectlet.js',
             format: 'iife',
             exports: 'named',
             name: 'mpInspectletKit',
